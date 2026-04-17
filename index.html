@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>我的 GAS 網站</title>
+</head>
+<body>
+    <h1>GAS 資料：</h1>
+    <div id="content">載入中...</div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxrxbPUd9cOdj-9n2CBCNwOAY3YTUg-hdLPjFSnOlNiMSxwt0qp1xSbRTtiGuBqVG3vKw/exec';
+
+        fetch(scriptURL)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('content').innerText = data.message;
+            })
+            .catch(error => console.error('Error!', error));
+    </script>
+</body>
+</html>
