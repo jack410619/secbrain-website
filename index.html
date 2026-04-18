@@ -95,44 +95,7 @@
             resDiv.innerText = data.answer;
         }
 
-        async function fetchPasteboard() {
-            const list = document.getElementById('pasteList');
-            list.innerHTML = "載入中...";
-            const response = await fetch(`${GAS_URL}?action=getPaste`);
-            const items = await response.json();
-            
-            list.innerHTML = "";
-            if(items.length === 0) list.innerHTML = "📭 目前沒有暫存資料";
-            
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 shadow-sm";
-                div.innerText = item.content;
-                div.onclick = () => copyAndDelete(item.id, item.content);
-                list.appendChild(div);
-            });
-        }
-
-        async function copyAndDelete(id, text) {
-            await navigator.clipboard.writeText(text);
-            alert("已複製到剪貼簿，將從伺服器移除。");
-            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
-            fetchPasteboard();
-        }
-        // Add this to your <script> section
-    async function submitWebPaste() {
-        const text = document.getElementById('webPasteInput').value;
-        if(!text) return;
-        await fetch(window.location.href, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: 'submitPaste', content: text })
-        });
-        alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
-        document.getElementById('webPasteInput').value = "";
-    }
-
-    // Update your fetchPasteboard to not run automatically
+        // Update your fetchPasteboard to not run automatically
     async function fetchPasteboard() {
         const list = document.getElementById('pasteList');
         list.innerHTML = "<p class='text-center text-gray-500'>讀取中...</p>";
@@ -152,6 +115,26 @@
             div.onclick = () => copyAndDelete(item.id, item.content);
             list.appendChild(div);
         });
+    }
+
+        async function copyAndDelete(id, text) {
+            await navigator.clipboard.writeText(text);
+            alert("已複製到剪貼簿，將從伺服器移除。");
+            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
+            fetchPasteboard();
+        }
+        // Add this to your <script> section
+        
+        async function submitWebPaste() {
+            const text = document.getElementById('webPasteInput').value;
+            if(!text) return;
+            await fetch(window.location.href, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'submitPaste', content: text })
+        });
+            alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
+            document.getElementById('webPasteInput').value = "";
     }
     </script>
 </body>
