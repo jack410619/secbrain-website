@@ -37,17 +37,25 @@
             <div id="searchResult" class="mt-6 p-4 bg-blue-50 rounded-lg text-gray-700 hidden italic"></div>
         </div>
 
-        <!-- Tab 3: Pasteboard -->
-        <div id="content-paste" class="tab-content p-6 text-center">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">跨裝置剪貼簿</h2>
-            <p class="text-sm text-gray-500 mb-4">點擊下方內容即可複製並自動刪除</p>
-            <div id="pasteList" class="space-y-3 text-left">
-                <!-- Paste items appear here -->
-            </div>
-            <button onclick="fetchPasteboard()" class="mt-6 text-blue-600 underline text-sm">重新整理</button>
-        </div>
+        <!-- Replace your Tab 3: Pasteboard section with this -->
+<div id="content-paste" class="tab-content p-6 text-center">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">跨裝置剪貼簿 (Bilateral)</h2>
+    
+    <!-- New: Upload to Pasteboard from Web -->
+    <div class="mb-6 p-4 bg-gray-100 rounded-lg">
+        <input type="text" id="webPasteInput" class="w-full p-2 border rounded mb-2" placeholder="輸入要傳送到 Line 的文字...">
+        <button onclick="submitWebPaste()" class="w-full bg-green-600 text-white py-2 rounded font-bold text-sm">傳送到剪貼簿</button>
     </div>
 
+    <hr class="mb-6">
+
+    <!-- New: Manual Inquire Button -->
+    <button onclick="fetchPasteboard()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mb-4">查詢剪貼簿內容 (Inquire)</button>
+    
+    <div id="pasteList" class="space-y-3 text-left">
+        <!-- Items appear only after clicking Inquire -->
+    </div>
+</div>
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec"; // <--- 替換成你的 GAS URL
 
@@ -111,6 +119,40 @@
             await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
             fetchPasteboard();
         }
+        // Add this to your <script> section
+    async function submitWebPaste() {
+        const text = document.getElementById('webPasteInput').value;
+        if(!text) return;
+        await fetch(window.location.href, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'submitPaste', content: text })
+        });
+        alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
+        document.getElementById('webPasteInput').value = "";
+    }
+
+    // Update your fetchPasteboard to not run automatically
+    async function fetchPasteboard() {
+        const list = document.getElementById('pasteList');
+        list.innerHTML = "<p class='text-center text-gray-500'>讀取中...</p>";
+        const response = await fetch(`${window.location.href}?action=getPaste`);
+        const items = await response.json();
+        
+        list.innerHTML = "";
+        if(items.length === 0) {
+            list.innerHTML = "📭 目前沒有暫存資料";
+            return;
+        }
+        
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 shadow-sm transition";
+            div.innerHTML = `<div class='text-xs text-gray-400 mb-1'>${item.created_at}</div><div>${item.content}</div>`;
+            div.onclick = () => copyAndDelete(item.id, item.content);
+            list.appendChild(div);
+        });
+    }
     </script>
 </body>
 </html>
