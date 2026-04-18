@@ -1,30 +1,21 @@
 <script>
-    // CRITICAL: Paste your actual GAS Web App URL (the one ending in /exec) here
-    const GAS_URL = "https://script.google.com/home/projects/14mIFbwYumNJkNMcFS_6-3ZQQj40L4--pifKvRNyNe-5ccotKtcGsysuv/edit?hl=zh-tw"; 
-
-    function showTab(tab) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
-        document.getElementById('content-' + tab).classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active-tab');
-    }
+    const GAS_URL = "YOUR_NEW_DEPLOYED_EXEC_URL"; // REPLACE THIS
 
     async function submitNote() {
         const text = document.getElementById('noteInput').value;
-        if(!text) return alert("內容不能為空");
-        
+        if(!text) return;
         const btn = document.getElementById('btn-submit');
-        btn.disabled = true; btn.innerText = "傳送中...";
+        btn.disabled = true; btn.innerText = "Saving...";
 
-        // Note: Using 'no-cors' for POST ensures the data is sent 
-        // even if the browser blocks reading the response.
+        // Send as text/plain to avoid CORS pre-flight blocks
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'submit', content: text })
         });
 
-        alert("已儲存至緩存！");
+        alert("Saved!");
         document.getElementById('noteInput').value = "";
         btn.disabled = false; btn.innerText = "上傳到緩存";
     }
@@ -33,64 +24,53 @@
         const query = document.getElementById('searchInput').value;
         if(!query) return;
         const resDiv = document.getElementById('searchResult');
-        resDiv.innerText = "思考中..."; resDiv.classList.remove('hidden');
+        resDiv.innerText = "Thinking..."; resDiv.classList.remove('hidden');
 
-        try {
-            const response = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
-            const data = await response.json();
-            resDiv.innerText = data.answer;
-        } catch (e) {
-            resDiv.innerText = "搜尋失敗，請檢查網路連線。";
-        }
+        const response = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        resDiv.innerText = data.answer;
     }
 
     async function submitWebPaste() {
         const text = document.getElementById('webPasteInput').value;
         if(!text) return;
-        
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ action: 'submitPaste', content: text })
         });
-        alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
+        alert("Sent to Pasteboard!");
         document.getElementById('webPasteInput').value = "";
     }
 
     async function fetchPasteboard() {
         const list = document.getElementById('pasteList');
-        list.innerHTML = "<p class='text-center text-gray-500 italic'>讀取中...</p>";
-        
-        try {
-            const response = await fetch(`${GAS_URL}?action=getPaste`);
-            const items = await response.json();
-            
-            list.innerHTML = "";
-            if(items.length === 0) {
-                list.innerHTML = "<p class='text-center text-gray-400'>📭 目前剪貼簿是空的</p>";
-                return;
-            }
-            
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 shadow-sm transition";
-                div.innerHTML = `<div class='text-[10px] text-gray-400 mb-1'>${item.created_at}</div><div class='text-sm text-gray-700'>${item.content}</div>`;
-                div.onclick = () => copyAndDelete(item.id, item.content);
-                list.appendChild(div);
-            });
-        } catch (e) {
-            list.innerHTML = "<p class='text-center text-red-400'>讀取失敗，可能是 URL 錯誤或資料庫連線中斷</p>";
-        }
+        list.innerHTML = "Loading...";
+        const response = await fetch(`${GAS_URL}?action=getPaste`);
+        const items = await response.json();
+        list.innerHTML = "";
+        if(items.length === 0) { list.innerHTML = "Empty."; return; }
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-blue-50";
+            div.innerHTML = `<div class='text-[10px] text-gray-400'>${item.created_at}</div><div>${item.content}</div>`;
+            div.onclick = () => copyAndDelete(item.id, item.content);
+            list.appendChild(div);
+        });
     }
 
     async function copyAndDelete(id, text) {
-        try {
-            await navigator.clipboard.writeText(text);
-            alert("已複製到剪貼簿！資料將從伺服器移除。");
-            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
-            fetchPasteboard(); 
-        } catch (err) {
-            alert("複製失敗，請手動複製：" + text);
-        }
+        await navigator.clipboard.writeText(text);
+        alert("Copied!");
+        await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
+        fetchPasteboard();
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
+        document.getElementById('content-' + tab).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active-tab');
     }
 </script>
