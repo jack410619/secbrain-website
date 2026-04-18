@@ -1,280 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Second Brain</title>
-  <style>
-    :root {
-      --primary: #6366f1;
-      --secondary: #a855f7;
-      --bg: #0f172a;
-      --card-bg: rgba(255, 255, 255, 0.05);
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      color: #e2e8f0;
-      min-height: 100vh;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-      animation: fadeIn 0.8s ease-out;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 800;
-      text-align: center;
-      background: linear-gradient(to right, #818cf8, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 30px;
-      letter-spacing: -1px;
-    }
-
-    .glass-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    .label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; display: block; }
-
-    textarea, input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px;
-      color: white;
-      font-size: 16px;
-      transition: 0.3s;
-      box-sizing: border-box;
-      margin-bottom: 15px;
-    }
-
-    textarea:focus, input:focus { outline: none; border-color: var(--primary); background: rgba(0, 0, 0, 0.4); }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-save { background: linear-gradient(to right, #4f46e5, #7c3aed); color: white; }
-    .btn-search { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
-    
-    button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
-    button:active { transform: translateY(0); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    #result {
-      margin-top: 20px;
-      padding: 18px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 16px;
-      font-size: 15px;
-      line-height: 1.6;
-      border-left: 4px solid var(--primary);
-      display: none;
-      animation: slideIn 0.4s ease-out;
-    }
-
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
-    .status-msg { text-align: center; font-size: 13px; margin-top: 10px; color: #818cf8; min-height: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Second Brain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .active-tab { border-bottom: 2px solid #2563eb; color: #2563eb; }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h1>BRAIN CORE v2.0</h1>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col">
+        <!-- Tabs Header -->
+        <div class="flex border-b">
+            <button onclick="showTab('submit')" id="tab-submit" class="flex-1 py-4 text-center font-medium active-tab">上傳 (Input)</button>
+            <button onclick="showTab('search')" id="tab-search" class="flex-1 py-4 text-center font-medium text-gray-500">搜尋 (Search)</button>
+            <button onclick="showTab('paste')" id="tab-paste" class="flex-1 py-4 text-center font-medium text-gray-500">剪貼簿 (Paste)</button>
+        </div>
 
-    <div id="clipboard-container" class="glass-card" style="display: none;">
-      <span class="label">Cloud Clipboard</span>
-      <div id="cache-text" style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 15px;"></div>
-      <button onclick="getAndClearCache()" style="background-color: #ca8a04; color: white; border: none; padding: 10px 16px;">
-        📋 複製並清除
-      </button>
+        <!-- Tab 1: Submit -->
+        <div id="content-submit" class="tab-content active p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">瑣碎想法 / 單字</h2>
+            <textarea id="noteInput" class="w-full h-40 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="輸入你想記錄的內容..."></textarea>
+            <button onclick="submitNote()" id="btn-submit" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">上傳到緩存</button>
+        </div>
+
+        <!-- Tab 2: Search -->
+        <div id="content-search" class="tab-content p-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">語義搜尋</h2>
+            <div class="flex gap-2">
+                <input type="text" id="searchInput" class="flex-1 p-2 border rounded-lg" placeholder="搜尋關鍵字或概念...">
+                <button onclick="runSearch()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">搜尋</button>
+            </div>
+            <div id="searchResult" class="mt-6 p-4 bg-blue-50 rounded-lg text-gray-700 hidden italic"></div>
+        </div>
+
+        <!-- Tab 3: Pasteboard -->
+        <div id="content-paste" class="tab-content p-6 text-center">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">跨裝置剪貼簿</h2>
+            <p class="text-sm text-gray-500 mb-4">點擊下方內容即可複製並自動刪除</p>
+            <div id="pasteList" class="space-y-3 text-left">
+                <!-- Paste items appear here -->
+            </div>
+            <button onclick="fetchPasteboard()" class="mt-6 text-blue-600 underline text-sm">重新整理</button>
+        </div>
     </div>
 
-    <div class="glass-card">
-      <span class="label">Input Thought</span>
-      <textarea id="noteInput" rows="4" placeholder="在此輸入新知識、見解或待辦事項..."></textarea>
-      <button id="saveBtn" class="btn-save" onclick="saveNote()">
-        <span>✦</span> 儲存記憶
-      </button>
-      <div id="saveStatus" class="status-msg"></div>
-    </div>
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec"; // <--- 替換成你的 GAS URL
 
-    <div class="glass-card">
-      <span class="label">Semantic Search</span>
-      <input id="queryInput" placeholder="詢問你的大腦...">
-      <button id="searchBtn" class="btn-search" onclick="searchBrain()">
-        <span>🔍</span> 檢索內容
-      </button>
-      <div id="result"></div>
-    </div>
-  </div> 
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
+            document.getElementById('content-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active-tab');
+            if(tab === 'paste') fetchPasteboard();
+        }
 
-<script>
-  // ================= 設定區 =================
-  const SUPABASE_URL = "https://jwgqfukdsytriovvawqt.supabase.co"; 
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3Z3FmdWtkc3l0cmlvdnZhd3F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MjAxOTAsImV4cCI6MjA5MTM5NjE5MH0.s6ZZFC7YmlyOvtYtVHhBKKrLJ3tfl_QRneEqClSCQ9U";
-  
-  // 🔴 必須修改：填入你更新部署後的 GAS 網址 (開頭是 https://script.google.com/...)
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzUQ2LbCn5onfV8QjnjZacW9igsuG2TZ80bvNtLxq-HdCqCL7nfb7uzT7URwjaLA2PBdQ/exec"; 
+        async function submitNote() {
+            const text = document.getElementById('noteInput').value;
+            if(!text) return alert("內容不能為空");
+            
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true; btn.innerText = "傳送中...";
 
-  window.onload = function() {
-    fetchClipboard();
-  };
+            await fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'submit', content: text })
+            });
 
-  // --- 1. 雲端剪貼簿功能 ---
-  async function fetchClipboard() {
-    if (!SUPABASE_URL.startsWith("http")) return;
+            alert("已儲存！");
+            document.getElementById('noteInput').value = "";
+            btn.disabled = false; btn.innerText = "上傳到緩存";
+        }
 
-    const url = `${SUPABASE_URL}/rest/v1/daily_notes?status=eq.cached&select=content`;
-    try {
-      const response = await fetch(url, {
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-      });
-      const data = await response.json();
-      
-      const container = document.getElementById('clipboard-container');
-      const textElem = document.getElementById('cache-text');
-      
-      if (data && data.length > 0) {
-        container.style.display = 'block';
-        textElem.innerText = data[0].content;
-      } else {
-        container.style.display = 'none';
-      }
-    } catch (e) {
-      console.error("抓取快取失敗：", e);
-    }
-  }
+        async function runSearch() {
+            const query = document.getElementById('searchInput').value;
+            const resDiv = document.getElementById('searchResult');
+            resDiv.innerText = "思考中..."; resDiv.classList.remove('hidden');
 
-  async function getAndClearCache() {
-    const text = document.getElementById('cache-text').innerText;
-    navigator.clipboard.writeText(text);
-    
-    const url = `${SUPABASE_URL}/rest/v1/daily_notes?status=eq.cached`;
-    await fetch(url, {
-      method: "DELETE",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-    });
-    alert("📋 內容已複製，並從雲端清除！");
-    fetchClipboard();
-  }
+            const response = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            resDiv.innerText = data.answer;
+        }
 
-  // --- 2. 儲存記憶 (直接與 Supabase 連線) ---
-  async function saveNote() {
-    const noteInput = document.getElementById('noteInput');
-    const content = noteInput.value;
-    const saveBtn = document.getElementById('saveBtn');
-    const statusMsg = document.getElementById('saveStatus');
+        async function fetchPasteboard() {
+            const list = document.getElementById('pasteList');
+            list.innerHTML = "載入中...";
+            const response = await fetch(`${GAS_URL}?action=getPaste`);
+            const items = await response.json();
+            
+            list.innerHTML = "";
+            if(items.length === 0) list.innerHTML = "📭 目前沒有暫存資料";
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 shadow-sm";
+                div.innerText = item.content;
+                div.onclick = () => copyAndDelete(item.id, item.content);
+                list.appendChild(div);
+            });
+        }
 
-    if (!content.trim()) {
-      statusMsg.innerText = "⚠️ 內容不能為空喔！";
-      statusMsg.style.color = "#ef4444";
-      return;
-    }
-
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = "<span>⏳</span> 儲存中...";
-    statusMsg.innerText = "";
-
-    try {
-      const url = `${SUPABASE_URL}/rest/v1/daily_notes`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { 
-          "apikey": SUPABASE_KEY, 
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({ "content": content })
-      });
-
-      if (response.ok) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = "<span>✦</span> 儲存記憶";
-        statusMsg.innerText = "✅ 儲存成功";
-        statusMsg.style.color = "#10b981";
-        noteInput.value = ""; 
-      } else {
-        throw new Error("資料庫拒絕存取");
-      }
-    } catch (error) {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = "<span>✦</span> 儲存記憶";
-      statusMsg.innerText = "❌ 系統錯誤：" + error.message;
-      statusMsg.style.color = "#ef4444";
-    }
-  }
-
-  // --- 3. 檢索內容 (呼叫 GAS 做 AI 處理) ---
-  async function searchBrain() {
-    const queryInput = document.getElementById('queryInput');
-    const query = queryInput.value;
-    const searchBtn = document.getElementById('searchBtn');
-    const resultDiv = document.getElementById('result');
-
-    if (!query.trim()) {
-      alert("請輸入要詢問的內容！");
-      return;
-    }
-
-    searchBtn.disabled = true;
-    searchBtn.innerHTML = "<span>⏳</span> 檢索中...";
-    resultDiv.style.display = "block";
-    resultDiv.innerText = "🧠 大腦正在高速檢索與思考中，請稍候...";
-
-    try {
-      // 呼叫 GAS API 
-      const response = await fetch(`${GAS_API_URL}?action=search&query=${encodeURIComponent(query)}`);
-      const json = await response.json();
-
-      searchBtn.disabled = false;
-      searchBtn.innerHTML = "<span>🔍</span> 檢索內容";
-
-      if (json.success) {
-        resultDiv.innerHTML = json.data.replace(/\n/g, '<br>'); 
-      } else {
-        resultDiv.innerText = "❌ 發生錯誤：" + (json.message || "未知錯誤");
-      }
-    } catch (error) {
-      searchBtn.disabled = false;
-      searchBtn.innerHTML = "<span>🔍</span> 檢索內容";
-      resultDiv.innerText = "❌ 連線失敗，請檢查 GAS 網址是否正確。";
-    }
-  }
-</script>
+        async function copyAndDelete(id, text) {
+            await navigator.clipboard.writeText(text);
+            alert("已複製到剪貼簿，將從伺服器移除。");
+            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
+            fetchPasteboard();
+        }
+    </script>
 </body>
 </html>
