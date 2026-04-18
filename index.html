@@ -1,154 +1,96 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Second Brain</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .active-tab { border-bottom: 2px solid #2563eb; color: #2563eb; }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col">
-        <!-- Tabs Header -->
-        <div class="flex border-b">
-            <button onclick="showTab('submit')" id="tab-submit" class="flex-1 py-4 text-center font-medium active-tab">上傳 (Input)</button>
-            <button onclick="showTab('search')" id="tab-search" class="flex-1 py-4 text-center font-medium text-gray-500">搜尋 (Search)</button>
-            <button onclick="showTab('paste')" id="tab-paste" class="flex-1 py-4 text-center font-medium text-gray-500">剪貼簿 (Paste)</button>
-        </div>
+<script>
+    // CRITICAL: Paste your actual GAS Web App URL (the one ending in /exec) here
+    const GAS_URL = "https://script.google.com/home/projects/14mIFbwYumNJkNMcFS_6-3ZQQj40L4--pifKvRNyNe-5ccotKtcGsysuv/edit?hl=zh-tw"; 
 
-        <!-- Tab 1: Submit -->
-        <div id="content-submit" class="tab-content active p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">瑣碎想法 / 單字</h2>
-            <textarea id="noteInput" class="w-full h-40 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="輸入你想記錄的內容..."></textarea>
-            <button onclick="submitNote()" id="btn-submit" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">上傳到緩存</button>
-        </div>
+    function showTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
+        document.getElementById('content-' + tab).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active-tab');
+    }
 
-        <!-- Tab 2: Search -->
-        <div id="content-search" class="tab-content p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">語義搜尋</h2>
-            <div class="flex gap-2">
-                <input type="text" id="searchInput" class="flex-1 p-2 border rounded-lg" placeholder="搜尋關鍵字或概念...">
-                <button onclick="runSearch()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">搜尋</button>
-            </div>
-            <div id="searchResult" class="mt-6 p-4 bg-blue-50 rounded-lg text-gray-700 hidden italic"></div>
-        </div>
+    async function submitNote() {
+        const text = document.getElementById('noteInput').value;
+        if(!text) return alert("內容不能為空");
+        
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true; btn.innerText = "傳送中...";
 
-        <!-- Tab 3: Pasteboard -->
-        <div id="content-paste" class="tab-content p-6 text-center">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">跨裝置剪貼簿 (Bilateral)</h2>
-            
-            <div class="mb-6 p-4 bg-gray-100 rounded-lg text-left">
-                <label class="text-xs font-bold text-gray-500 uppercase">傳送到 Line (\getpaste)</label>
-                <input type="text" id="webPasteInput" class="w-full p-2 border rounded mt-1 mb-2" placeholder="輸入文字...">
-                <button onclick="submitWebPaste()" class="w-full bg-green-600 text-white py-2 rounded font-bold text-sm hover:bg-green-700">傳送到剪貼簿</button>
-            </div>
+        // Note: Using 'no-cors' for POST ensures the data is sent 
+        // even if the browser blocks reading the response.
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'submit', content: text })
+        });
 
-            <hr class="mb-6">
+        alert("已儲存至緩存！");
+        document.getElementById('noteInput').value = "";
+        btn.disabled = false; btn.innerText = "上傳到緩存";
+    }
 
-            <button onclick="fetchPasteboard()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mb-4 hover:bg-blue-700">查詢剪貼簿內容 (Inquire)</button>
-            
-            <div id="pasteList" class="space-y-3 text-left">
-                <!-- Items appear only after clicking Inquire -->
-            </div>
-        </div>
-    </div>
+    async function runSearch() {
+        const query = document.getElementById('searchInput').value;
+        if(!query) return;
+        const resDiv = document.getElementById('searchResult');
+        resDiv.innerText = "思考中..."; resDiv.classList.remove('hidden');
 
-    <script>
-        // GAS handles the URL automatically if hosted within doGet
-        const GAS_URL = window.location.href.split('?')[0]; 
-
-        function showTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab'));
-            document.getElementById('content-' + tab).classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active-tab');
-            // Removed automatic fetchPasteboard() to respect user request
-        }
-
-        async function submitNote() {
-            const text = document.getElementById('noteInput').value;
-            if(!text) return alert("內容不能為空");
-            
-            const btn = document.getElementById('btn-submit');
-            btn.disabled = true; btn.innerText = "傳送中...";
-
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: 'submit', content: text })
-            });
-
-            alert("已儲存至緩存！");
-            document.getElementById('noteInput').value = "";
-            btn.disabled = false; btn.innerText = "上傳到緩存";
-        }
-
-        async function runSearch() {
-            const query = document.getElementById('searchInput').value;
-            if(!query) return;
-            const resDiv = document.getElementById('searchResult');
-            resDiv.innerText = "思考中..."; resDiv.classList.remove('hidden');
-
+        try {
             const response = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
             const data = await response.json();
             resDiv.innerText = data.answer;
+        } catch (e) {
+            resDiv.innerText = "搜尋失敗，請檢查網路連線。";
         }
+    }
 
-        async function submitWebPaste() {
-            const text = document.getElementById('webPasteInput').value;
-            if(!text) return;
+    async function submitWebPaste() {
+        const text = document.getElementById('webPasteInput').value;
+        if(!text) return;
+        
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'submitPaste', content: text })
+        });
+        alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
+        document.getElementById('webPasteInput').value = "";
+    }
+
+    async function fetchPasteboard() {
+        const list = document.getElementById('pasteList');
+        list.innerHTML = "<p class='text-center text-gray-500 italic'>讀取中...</p>";
+        
+        try {
+            const response = await fetch(`${GAS_URL}?action=getPaste`);
+            const items = await response.json();
             
-            // POST to the same GAS URL
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ action: 'submitPaste', content: text })
+            list.innerHTML = "";
+            if(items.length === 0) {
+                list.innerHTML = "<p class='text-center text-gray-400'>📭 目前剪貼簿是空的</p>";
+                return;
+            }
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 shadow-sm transition";
+                div.innerHTML = `<div class='text-[10px] text-gray-400 mb-1'>${item.created_at}</div><div class='text-sm text-gray-700'>${item.content}</div>`;
+                div.onclick = () => copyAndDelete(item.id, item.content);
+                list.appendChild(div);
             });
-            alert("已存入剪貼簿，可在 Line 使用 \\getpaste 提取");
-            document.getElementById('webPasteInput').value = "";
+        } catch (e) {
+            list.innerHTML = "<p class='text-center text-red-400'>讀取失敗，可能是 URL 錯誤或資料庫連線中斷</p>";
         }
+    }
 
-        async function fetchPasteboard() {
-            const list = document.getElementById('pasteList');
-            list.innerHTML = "<p class='text-center text-gray-500 italic'>讀取中...</p>";
-            
-            try {
-                const response = await fetch(`${GAS_URL}?action=getPaste`);
-                const items = await response.json();
-                
-                list.innerHTML = "";
-                if(items.length === 0) {
-                    list.innerHTML = "<p class='text-center text-gray-400'>📭 目前剪貼簿是空的</p>";
-                    return;
-                }
-                
-                items.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = "p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 shadow-sm transition";
-                    // Displaying the short ID and content
-                    div.innerHTML = `<div class='text-[10px] text-gray-400 mb-1'>${item.created_at}</div><div class='text-sm text-gray-700'>${item.content}</div>`;
-                    div.onclick = () => copyAndDelete(item.id, item.content);
-                    list.appendChild(div);
-                });
-            } catch (e) {
-                list.innerHTML = "<p class='text-center text-red-400'>讀取失敗，請稍後再試</p>";
-            }
+    async function copyAndDelete(id, text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("已複製到剪貼簿！資料將從伺服器移除。");
+            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
+            fetchPasteboard(); 
+        } catch (err) {
+            alert("複製失敗，請手動複製：" + text);
         }
-
-        async function copyAndDelete(id, text) {
-            try {
-                await navigator.clipboard.writeText(text);
-                alert("已複製到剪貼簿！資料將從伺服器移除。");
-                await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
-                fetchPasteboard(); // Refresh list
-            } catch (err) {
-                alert("複製失敗，請手動複製：" + text);
-            }
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
