@@ -29,7 +29,7 @@ body {
     selection-background-color: var(--accent-primary);
 }
 
-/* --- Liquid Mesh Background --- */
+/* --- Liquid Mesh Background (增強流動效果) --- */
 .liquid-universe {
     position: fixed;
     inset: 0;
@@ -41,39 +41,59 @@ body {
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(110px);
+    filter: blur(120px); /* 增加模糊度強化流動融合感 */
     opacity: 0.45;
-    animation: drift 28s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    /* 優化動畫曲線和時長，流動更緩慢且自然 */
+    animation: drift 60s infinite alternate cubic-bezier(0.3, 0.1, 0.2, 0.9);
     mix-blend-mode: screen;
+    /* 增加輕微的陰影強化層次 */
+    box-shadow: 0 0 80px rgba(129, 140, 248, 0.15), 0 0 150px rgba(192, 132, 252, 0.1);
 }
 
 .orb-1 { 
-    width: 85vw; height: 85vw; 
+    width: 90vw; height: 90vw; 
     background: radial-gradient(circle, var(--accent-primary), transparent 70%); 
     top: -25%; left: -20%; 
-    animation-duration: 35s;
+    animation-duration: 70s; /* 更長時長=更慢流動 */
 }
 .orb-2 { 
-    width: 75vw; height: 75vw; 
+    width: 80vw; height: 80vw; 
     background: radial-gradient(circle, var(--accent-secondary), transparent 70%); 
     bottom: -15%; right: -15%; 
-    animation-delay: -10s;
-    animation-duration: 42s;
+    animation-delay: -15s;
+    animation-duration: 80s;
 }
 .orb-3 { 
-    width: 60vw; height: 60vw; 
+    width: 65vw; height: 65vw; 
     background: radial-gradient(circle, #38bdf8, transparent 70%); 
     top: 35%; left: 35%; 
-    opacity: 0.2; 
-    animation-delay: -20s;
-    animation-duration: 50s;
+    opacity: 0.25; 
+    animation-delay: -30s;
+    animation-duration: 90s;
 }
 
+/* 優化流動動畫：位移更大、旋轉更自然、透明度變化更平滑 */
 @keyframes drift {
-    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.4; }
-    33% { opacity: 0.6; }
-    66% { opacity: 0.3; }
-    100% { transform: translate(20%, 15%) scale(1.15) rotate(35deg); opacity: 0.45; }
+    0% { 
+        transform: translate(0, 0) scale(1) rotate(0deg); 
+        opacity: 0.4; 
+    }
+    25% { 
+        opacity: 0.55; 
+        transform: translate(8%, 5%) scale(1.05) rotate(10deg);
+    }
+    50% { 
+        opacity: 0.6; 
+        transform: translate(15%, 10%) scale(1.1) rotate(20deg);
+    }
+    75% {
+        opacity: 0.5;
+        transform: translate(18%, 12%) scale(1.12) rotate(28deg);
+    }
+    100% { 
+        transform: translate(25%, 18%) scale(1.18) rotate(38deg); 
+        opacity: 0.48; 
+    }
 }
 
 /* Noise Texture Overlay */
@@ -256,11 +276,18 @@ textarea {
     <!-- Main Layout -->
     <div class="max-w-md mx-auto w-full h-full flex flex-col px-6 relative z-10">
         
-        <!-- Header -->
+        <!-- Header (新增動態問候語) -->
         <header class="pt-16 pb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-[200] tracking-tight text-white/90">Brain <span class="font-semibold text-indigo-300">Mirror</span></h1>
+                    <!-- 動態問候語容器 -->
+                    <h1 class="text-4xl font-[200] tracking-tight text-white/90" id="greetingText">
+                        Good Morning, Jack
+                    </h1>
+                    <!-- 保留 Brain Mirror 作為副標題，維持品牌識別 -->
+                    <h2 class="text-xl font-[200] tracking-tight text-white/60 mt-1">
+                        Brain <span class="font-semibold text-indigo-300">Mirror</span>
+                    </h2>
                     <div class="flex items-center gap-2 mt-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></span>
                         <p class="text-[9px] tracking-[0.3em] text-white/40 uppercase font-semibold">Neural Link Established</p>
@@ -352,6 +379,43 @@ textarea {
 <script>
 // Your existing JS logic remains untouched to preserve functionality
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec";
+
+// --- 新增：UTC+8 動態問候語邏輯 ---
+function updateGreeting() {
+    // 取得 UTC+8 時間 (台灣時區)
+    const now = new Date();
+    const utcOffset = 8; // UTC+8
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const localTime = new Date(utcTime + (3600000 * utcOffset));
+    const hour = localTime.getHours();
+
+    let greeting;
+    // 根據時段設定問候語
+    if (hour >= 5 && hour < 12) {
+        greeting = "Good Morning, Jack";
+    } else if (hour >= 12 && hour < 18) {
+        greeting = "Good Afternoon, Jack";
+    } else if (hour >= 18 && hour < 22) {
+        greeting = "Good Evening, Jack";
+    } else {
+        greeting = "Good Night, Jack";
+    }
+
+    // 更新畫面顯示
+    document.getElementById('greetingText').textContent = greeting;
+    // 輕微的動畫效果增強互動感
+    document.getElementById('greetingText').style.opacity = "0";
+    setTimeout(() => {
+        document.getElementById('greetingText').style.opacity = "1";
+        document.getElementById('greetingText').style.transition = "opacity 0.8s ease";
+    }, 100);
+}
+
+// 頁面載入時執行，並每小時更新一次
+window.onload = function() {
+    updateGreeting();
+    setInterval(updateGreeting, 3600000); // 每小時更新
+};
 
 function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
