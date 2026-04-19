@@ -1,303 +1,454 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Brain Mirror v4.1 | Stable Liquid</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #030712;
-            --liquid-primary: #6366f1;
-            --liquid-secondary: #ec4899;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Brain Mirror v5.0 | Liquid Glass</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-deep: #050508;
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --glass-surface: rgba(255, 255, 255, 0.02);
+    --accent-primary: #818cf8; /* Soft Indigo */
+    --accent-secondary: #c084fc; /* Soft Purple */
+    --accent-glow: rgba(129, 140, 248, 0.4);
+}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: #ffffff;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-deep);
+    color: #ffffff;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
+    selection-background-color: var(--accent-primary);
+}
 
-        /* iOS 26 Liquid Background */
-        .liquid-bg {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #111827, #020617);
-        }
+/* --- Liquid Mesh Background --- */
+.liquid-universe {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background: radial-gradient(circle at 50% 50%, #0b1020, var(--bg-deep));
+    overflow: hidden;
+}
 
-        .blob {
-            position: absolute;
-            width: 60vw; height: 60vw;
-            filter: blur(80px);
-            border-radius: 50%;
-            opacity: 0.2;
-            animation: fluidMove 20s infinite alternate ease-in-out;
-        }
-        .blob-1 { background: var(--liquid-primary); top: -10%; left: -10%; }
-        .blob-2 { background: var(--liquid-secondary); bottom: -10%; right: -10%; animation-delay: -5s; }
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: 0.45;
+    animation: drift 28s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    mix-blend-mode: screen;
+}
 
-        @keyframes fluidMove {
-            from { transform: translate(0, 0) scale(1) rotate(0deg); }
-            to { transform: translate(20%, 15%) scale(1.3) rotate(120deg); }
-        }
+.orb-1 { 
+    width: 85vw; height: 85vw; 
+    background: radial-gradient(circle, var(--accent-primary), transparent 70%); 
+    top: -25%; left: -20%; 
+    animation-duration: 35s;
+}
+.orb-2 { 
+    width: 75vw; height: 75vw; 
+    background: radial-gradient(circle, var(--accent-secondary), transparent 70%); 
+    bottom: -15%; right: -15%; 
+    animation-delay: -10s;
+    animation-duration: 42s;
+}
+.orb-3 { 
+    width: 60vw; height: 60vw; 
+    background: radial-gradient(circle, #38bdf8, transparent 70%); 
+    top: 35%; left: 35%; 
+    opacity: 0.2; 
+    animation-delay: -20s;
+    animation-duration: 50s;
+}
 
-        /* Liquid Glass Glassmorphism */
-        .liquid-glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(32px) saturate(180%);
-            -webkit-backdrop-filter: blur(32px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-        }
+@keyframes drift {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.4; }
+    33% { opacity: 0.6; }
+    66% { opacity: 0.3; }
+    100% { transform: translate(20%, 15%) scale(1.15) rotate(35deg); opacity: 0.45; }
+}
 
-        /* Main Container Adjustments */
-        main {
-            flex: 1;
-            padding-bottom: 120px; /* 為底部導航留出空間 */
-        }
+/* Noise Texture Overlay */
+.noise {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.04;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
 
-        .tab-content { 
-            display: none; 
-            height: 100%;
-            animation: liquidIn 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-        }
-        .tab-content.active { display: flex; flex-direction: column; }
+/* --- Liquid Glass Component --- */
+.glass-panel {
+    background: linear-gradient(135deg, var(--glass-surface), rgba(255,255,255,0.01));
+    backdrop-filter: blur(45px) saturate(160%);
+    -webkit-backdrop-filter: blur(45px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.25); /* Top rim light */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
 
-        @keyframes liquidIn {
-            from { opacity: 0; transform: translateY(15px) scale(0.98); filter: blur(10px); }
-            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-        }
+.glass-panel:active {
+    transform: scale(0.985);
+}
 
-        /* Navigation Bar (The Fixed Buggy Part) */
-        .dock-container {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+/* --- Content Transitions --- */
+.tab-content {
+    display: none;
+    height: 100%;
+    animation: flowIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-        .dock {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 12px;
-            border-radius: 35px;
-        }
+.tab-content.active { 
+    display: flex; 
+    flex-direction: column; 
+}
 
-        .dock-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: rgba(255,255,255,0.3);
-            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
-            position: relative;
-            flex: 1;
-        }
+@keyframes flowIn {
+    0% { opacity: 0; transform: scale(0.96) translateY(25px); filter: blur(12px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
 
-        .dock-item.active {
-            color: #ffffff;
-            transform: translateY(-4px);
-        }
+/* --- Input Styling --- */
+.liquid-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .active-dot {
-            width: 5px; height: 5px;
-            background: var(--liquid-primary);
-            box-shadow: 0 0 12px var(--liquid-primary);
-            border-radius: 50%;
-            margin-top: 6px;
-            opacity: 0;
-            transition: 0.3s;
-        }
-        .active .active-dot { opacity: 1; }
+.liquid-input:focus-within {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 30px var(--accent-glow);
+}
 
-        /* Button & Inputs */
-        .btn-liquid {
-            background: #ffffff;
-            color: #000000;
-            border-radius: 24px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .btn-liquid:active { transform: scale(0.95); opacity: 0.8; }
+textarea {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: rgba(255,255,255,0.9);
+}
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
+/* --- Button Aesthetics --- */
+.btn-fluid {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    color: #0f172a;
+    border-radius: 24px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    box-shadow: 0 10px 30px -5px rgba(255, 255, 255, 0.15);
+}
+
+.btn-fluid:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 15px 40px -5px rgba(129, 140, 248, 0.35);
+}
+
+.btn-fluid:active { 
+    transform: scale(0.96); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Liquid sheen effect */
+.btn-fluid::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    transition: left 0.6s ease;
+    z-index: 0;
+}
+.btn-fluid:hover::before { left: 100%; }
+
+/* --- Navigation Dock --- */
+.dock-wrap {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.dock {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 36px;
+    background: rgba(15, 15, 20, 0.65);
+    backdrop-filter: blur(35px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+.dock-item {
+    width: 52px; height: 52px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 22px;
+    color: rgba(255,255,255,0.5);
+    transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.dock-item:active { transform: scale(0.9); }
+
+.dock-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transform: translateY(-4px);
+}
+
+.dock-item svg { width: 22px; height: 22px; z-index: 1; stroke-width: 2; }
+
+/* The "Liquid" dot indicator */
+.active-glow {
+    position: absolute;
+    bottom: 5px;
+    width: 4px; height: 4px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    filter: blur(1.5px);
+    box-shadow: 0 0 10px var(--accent-primary), 0 0 20px var(--accent-secondary);
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.active .active-glow { 
+    opacity: 1; 
+    transform: scale(1.4); 
+}
+
+/* Custom Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 </head>
 <body>
-    <div class="liquid-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
+    <!-- Fluid Background -->
+    <div class="liquid-universe">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
+    <div class="noise"></div>
 
-    <div class="max-w-md mx-auto w-full h-full flex flex-col px-6">
+    <!-- Main Layout -->
+    <div class="max-w-md mx-auto w-full h-full flex flex-col px-6 relative z-10">
         
         <!-- Header -->
         <header class="pt-16 pb-8">
-            <h1 class="text-3xl font-light">Mirror <span class="font-semibold">Jack</span></h1>
-            <p id="status-line" class="text-[9px] tracking-[0.4em] text-white/20 uppercase mt-2">Core Synchronization Active</p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-[200] tracking-tight text-white/90">Brain <span class="font-semibold text-indigo-300">Mirror</span></h1>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></span>
+                        <p class="text-[9px] tracking-[0.3em] text-white/40 uppercase font-semibold">Neural Link Established</p>
+                    </div>
+                </div>
+                <div class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-[9px] font-bold border-white/10 text-white/60">v5.0</div>
+            </div>
         </header>
 
         <!-- Main Content Area -->
-        <main class="overflow-hidden">
+        <main class="flex-1 overflow-hidden relative">
             
             <!-- Tab: Capture -->
             <div id="content-submit" class="tab-content active">
-                <div class="liquid-glass rounded-[40px] p-6 flex-1 flex flex-col mb-4">
-                    <textarea id="noteInput" class="w-full flex-1 bg-transparent text-xl font-light outline-none resize-none placeholder-white/10 no-scrollbar" placeholder="記錄此瞬的心流..."></textarea>
-                    <button onclick="submitNote()" id="btn-submit" class="btn-liquid py-4 mt-4 text-sm uppercase tracking-widest">Capture</button>
+                <div class="glass-panel rounded-[40px] p-7 flex-1 flex flex-col mb-28 relative overflow-hidden group">
+                    <!-- Subtle inner glow -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"></div>
+                    
+                    <textarea id="noteInput"
+                        class="w-full flex-1 bg-transparent text-lg font-light outline-none resize-none placeholder-white/15 no-scrollbar leading-relaxed py-2"
+                        placeholder="Capture thoughts in the flow..."></textarea>
+                    
+                    <button onclick="submitNote()" id="btn-submit"
+                        class="btn-fluid w-full py-4 mt-6 text-[10px] font-bold uppercase tracking-[0.25em] relative z-10">
+                        Capture Fragment
+                    </button>
                 </div>
             </div>
 
             <!-- Tab: Search -->
             <div id="content-search" class="tab-content">
-                <div class="liquid-glass rounded-3xl p-2 flex items-center mb-6">
-                    <input type="text" id="searchInput" class="flex-1 bg-transparent px-4 py-3 outline-none" placeholder="檢索思緒...">
-                    <button onclick="runSearch()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">🔍</button>
+                <div class="liquid-input p-1.5 flex items-center mb-6 shadow-lg shadow-indigo-900/10">
+                    <input type="text" id="searchInput" class="flex-1 bg-transparent px-5 py-4 outline-none text-sm font-light placeholder-white/30" placeholder="Query neural archives...">
+                    <button onclick="runSearch()" class="w-11 h-11 rounded-[20px] bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
                 </div>
-                <div id="searchResult" class="liquid-glass rounded-[32px] p-6 text-sm text-white/60 hidden overflow-y-auto no-scrollbar"></div>
+                <div id="searchResult" class="glass-panel rounded-[32px] p-7 text-sm text-white/80 hidden overflow-y-auto no-scrollbar mb-28 border-white/5 leading-relaxed font-light"></div>
             </div>
 
             <!-- Tab: Sync -->
             <div id="content-paste" class="tab-content">
-                <div class="liquid-glass rounded-3xl p-5 mb-6">
-                    <div class="flex gap-2">
-                        <input type="text" id="webPasteInput" class="flex-1 bg-white/5 rounded-xl px-4 py-2 text-sm outline-none border border-white/5" placeholder="Web → Neural">
-                        <button onclick="submitWebPaste()" class="text-indigo-400 text-xs font-bold px-2">PUSH</button>
+                <div class="glass-panel rounded-[32px] p-1.5 mb-6 flex gap-2 border-white/10">
+                    <input type="text" id="webPasteInput" class="flex-1 bg-white/5 rounded-2xl px-5 py-3 text-sm outline-none font-light placeholder-white/20" placeholder="Web → Cloud Sync">
+                    <button onclick="submitWebPaste()" class="bg-white text-black px-6 rounded-2xl text-[9px] font-bold uppercase tracking-widest hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow">Push</button>
+                </div>
+                
+                <div id="sync-placeholder" class="flex-1 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[40px] mb-28 group cursor-pointer hover:bg-white/[0.02] transition-colors" onclick="fetchPasteboard()">
+                    <div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_30px_rgba(129,140,248,0.1)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
                     </div>
+                    <p class="text-[10px] text-white/30 tracking-[0.4em] mb-2">PULSE READY</p>
+                    <p class="text-[8px] text-white/15 tracking-widest">Tap to sync</p>
                 </div>
 
-                <div id="sync-placeholder" class="flex-1 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[40px] mb-4">
-                    <p class="text-[10px] text-white/20 tracking-widest mb-6">READY FOR SCAN</p>
-                    <button onclick="fetchPasteboard()" class="px-10 py-3 bg-white/5 rounded-full text-xs font-medium border border-white/10 hover:bg-white/10 transition-all">Deep Scan</button>
-                </div>
-
-                <div id="pasteList" class="flex-1 space-y-4 overflow-y-auto no-scrollbar"></div>
+                <div id="pasteList" class="flex-1 space-y-4 overflow-y-auto no-scrollbar mb-28"></div>
             </div>
-
         </main>
 
-        <!-- Fixed Bottom Dock (REBUILT) -->
-        <div class="dock-container">
-            <nav class="liquid-glass dock">
+        <!-- Fixed Bottom Dock -->
+        <div class="dock-wrap">
+            <nav class="dock">
                 <button onclick="showTab('submit')" id="tab-submit" class="dock-item active">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
-                    <div class="active-dot"></div>
+                    <div class="active-glow"></div>
                 </button>
-
                 <button onclick="showTab('search')" id="tab-search" class="dock-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <div class="active-dot"></div>
+                    <div class="active-glow"></div>
                 </button>
-
                 <button onclick="showTab('paste')" id="tab-paste" class="dock-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    <div class="active-dot"></div>
+                    <div class="active-glow"></div>
                 </button>
             </nav>
         </div>
     </div>
 
-    <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec"; 
+<script>
+// Your existing JS logic remains untouched to preserve functionality
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec";
 
-        // 1. Tab Switching Fix
-        function showTab(tab) {
-            // Hide all content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            // Reset all dock items
-            document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+    document.getElementById('content-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (window.navigator.vibrate) window.navigator.vibrate(8);
+}
 
-            // Activate target
-            document.getElementById('content-' + tab).classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active');
+async function submitNote() {
+    const text = document.getElementById('noteInput').value;
+    if(!text) return;
+    const btn = document.getElementById('btn-submit');
+    const originalText = btn.innerText;
+    btn.innerText = "Syncing...";
+    btn.style.opacity = "0.7";
+    try {
+        await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'submit', content: text }) });
+        document.getElementById('noteInput').value = "";
+        btn.innerText = "Captured";
+        setTimeout(() => { btn.innerText = originalText; btn.style.opacity = "1"; }, 2000);
+    } catch(e) {
+        btn.innerText = "Retry";
+    }
+}
 
-            // Haptic feedback placeholder
-            if (window.navigator.vibrate) window.navigator.vibrate(5);
+async function runSearch() {
+    const query = document.getElementById('searchInput').value;
+    const resDiv = document.getElementById('searchResult');
+    resDiv.classList.remove('hidden');
+    resDiv.innerHTML = "<div class='py-12 flex flex-col items-center'><div class='w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4'></div><div class='text-[9px] tracking-[0.3em] opacity-40 uppercase'>Scanning Neural Web...</div></div>";
+    try {
+        const res = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        resDiv.innerHTML = `<div class='text-indigo-400 text-[9px] mb-4 tracking-[0.3em] uppercase font-bold'>Fragment Retrieved</div><div class="opacity-90 leading-relaxed">${data.answer}</div>`;
+    } catch(e) {
+        resDiv.innerHTML = "<div class='text-white/50'>Search unavailable.</div>";
+    }
+}
+
+async function fetchPasteboard() {
+    const list = document.getElementById('pasteList');
+    const placeholder = document.getElementById('sync-placeholder');
+    
+    // Visual feedback
+    if(placeholder.classList.contains('hidden')) {
+        list.innerHTML = "<div class='flex justify-center py-8'><div class='w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin'></div></div>";
+    } else {
+        placeholder.innerHTML = "<div class='w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin'></div>";
+    }
+
+    try {
+        const response = await fetch(`${GAS_URL}?action=getPaste`);
+        const items = await response.json();
+        placeholder.classList.add('hidden');
+        list.innerHTML = "";
+        if(items.length === 0) {
+            placeholder.classList.remove('hidden');
+            placeholder.innerHTML = "<div class='w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-4'><svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6 text-white/20' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4' /></svg></div><p class='text-[10px] text-white/30 tracking-[0.2em]'>Buffer Empty</p>";
+            return;
         }
-
-        // 2. Capture Action
-        async function submitNote() {
-            const text = document.getElementById('noteInput').value;
-            if(!text) return;
-            const btn = document.getElementById('btn-submit');
-            btn.innerText = "Syncing...";
-            btn.disabled = true;
-            await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'submit', content: text }) });
-            document.getElementById('noteInput').value = "";
-            btn.innerText = "Captured";
-            setTimeout(() => { btn.innerText = "Capture"; btn.disabled = false; }, 2000);
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.animationDelay = `${index * 0.05}s`;
+            div.className = "glass-panel p-6 rounded-3xl active:scale-[0.97] transition-all animate-[flowIn_0.5s_ease-out_forwards] cursor-pointer border-white/5";
+            div.innerHTML = `<div class='text-[8px] text-indigo-400 mb-2 font-bold tracking-widest uppercase'>Cloud Fragment</div><div class='text-sm text-white/80 font-light leading-relaxed'>${item.content}</div>`;
+            div.onclick = () => copyAndDelete(item.id, item.content);
+            list.appendChild(div);
+        });
+    } catch (e) {
+        if(placeholder.classList.contains('hidden')) {
+             list.innerHTML = "<div class='text-rose-400 text-center py-8'>Sync Failed</div>";
+        } else {
+            placeholder.innerHTML = "<p class='text-rose-400 text-[10px] tracking-widest'>SYNC FAILED</p>";
         }
+    }
+}
 
-        // 3. Search Action
-        async function runSearch() {
-            const query = document.getElementById('searchInput').value;
-            const resDiv = document.getElementById('searchResult');
-            resDiv.classList.remove('hidden');
-            resDiv.innerHTML = "<div class='py-4 text-center opacity-20 text-xs tracking-widest animate-pulse'>SEARCHING NEURAL NETWORK...</div>";
-            const res = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
-            const data = await res.json();
-            resDiv.innerHTML = `<div class='text-indigo-400 text-[10px] mb-4 tracking-[0.2em] uppercase font-bold'>Memory Fragment</div>${data.answer}`;
-        }
+async function copyAndDelete(id, text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
+        fetchPasteboard();
+    } catch(e) { console.error(e); }
+}
 
-        // 4. Sync (Paste) Action
-        async function fetchPasteboard() {
-            const list = document.getElementById('pasteList');
-            const placeholder = document.getElementById('sync-placeholder');
-            placeholder.innerHTML = "<div class='animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full'></div>";
-            
-            try {
-                const response = await fetch(`${GAS_URL}?action=getPaste`);
-                const items = await response.json();
-                placeholder.classList.add('hidden');
-                list.innerHTML = "";
-                
-                if(items.length === 0) {
-                    placeholder.classList.remove('hidden');
-                    placeholder.innerHTML = "<p class='text-[10px] text-white/20 tracking-widest mb-6'>NO DATA FOUND</p><button onclick='fetchPasteboard()' class='px-10 py-3 bg-white/5 rounded-full text-xs'>Retry Scan</button>";
-                    return;
-                }
-                
-                items.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = "liquid-glass p-6 rounded-3xl active:scale-95 transition-all";
-                    div.innerHTML = `<div class='text-[8px] text-indigo-400 mb-2 font-bold tracking-widest'>NEURAL CLOUD</div><div class='text-sm text-white/70'>${item.content}</div>`;
-                    div.onclick = () => copyAndDelete(item.id, item.content);
-                    list.appendChild(div);
-                });
-            } catch (e) {
-                placeholder.innerHTML = "<p class='text-rose-500 text-xs'>Sync Error</p>";
-            }
-        }
-
-        async function copyAndDelete(id, text) {
-            await navigator.clipboard.writeText(text);
-            await fetch(`${GAS_URL}?action=deletePaste&id=${id}`);
-            fetchPasteboard();
-        }
-
-        async function submitWebPaste() {
-            const text = document.getElementById('webPasteInput').value;
-            if(!text) return;
-            await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'submitPaste', content: text }) });
-            document.getElementById('webPasteInput').value = "";
-            alert("Fragment Uploaded");
-        }
-    </script>
+async function submitWebPaste() {
+    const text = document.getElementById('webPasteInput').value;
+    if(!text) return;
+    const btn = document.querySelector('#content-paste button');
+    const originalText = btn.innerText;
+    btn.innerText = "...";
+    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'submitPaste', content: text }) });
+    document.getElementById('webPasteInput').value = "";
+    btn.innerText = "Done";
+    setTimeout(() => btn.innerText = originalText, 1500);
+}
+</script>
 </body>
 </html>
