@@ -8,13 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-    --bg-deep: #050508;
-    --glass-border: rgba(255, 255, 255, 0.15);
+    --bg-deep: #080a12;
+    --glass-border: rgba(255, 255, 255, 0.12);
     --glass-highlight: rgba(255, 255, 255, 0.08);
     --glass-surface: rgba(255, 255, 255, 0.02);
-    --accent-primary: #818cf8; /* Soft Indigo */
-    --accent-secondary: #c084fc; /* Soft Purple */
-    --accent-glow: rgba(129, 140, 248, 0.4);
+    --accent-primary: #818cf8;
+    --accent-secondary: #c084fc;
+    --accent-glow: rgba(129, 140, 248, 0.35);
 }
 
 body {
@@ -29,107 +29,104 @@ body {
     selection-background-color: var(--accent-primary);
 }
 
-/* --- Liquid Mesh Background (增強流動效果) --- */
+/* Liquid Mesh Background */
 .liquid-universe {
     position: fixed;
     inset: 0;
     z-index: -2;
-    background: radial-gradient(circle at 50% 50%, #0b1020, var(--bg-deep));
+    background: radial-gradient(circle at 50% 50%, #0b1025, var(--bg-deep));
     overflow: hidden;
 }
 
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(120px); /* 增加模糊度強化流動融合感 */
-    opacity: 0.45;
-    /* 優化動畫曲線和時長，流動更緩慢且自然 */
-    animation: drift 60s infinite alternate cubic-bezier(0.3, 0.1, 0.2, 0.9);
+    filter: blur(130px);
+    opacity: 0.3;
+    animation: drift 80s infinite alternate cubic-bezier(0.3, 0.1, 0.2, 0.9);
     mix-blend-mode: screen;
-    /* 增加輕微的陰影強化層次 */
-    box-shadow: 0 0 80px rgba(129, 140, 248, 0.15), 0 0 150px rgba(192, 132, 252, 0.1);
+    box-shadow: 0 0 80px rgba(129, 140, 248, 0.12), 0 0 150px rgba(192, 132, 252, 0.08);
 }
 
 .orb-1 { 
     width: 90vw; height: 90vw; 
     background: radial-gradient(circle, var(--accent-primary), transparent 70%); 
     top: -25%; left: -20%; 
-    animation-duration: 70s; /* 更長時長=更慢流動 */
+    animation-duration: 90s;
 }
 .orb-2 { 
-    width: 80vw; height: 80vw; 
+    width: 85vw; height: 85vw; 
     background: radial-gradient(circle, var(--accent-secondary), transparent 70%); 
     bottom: -15%; right: -15%; 
-    animation-delay: -15s;
-    animation-duration: 80s;
+    animation-delay: -20s;
+    animation-duration: 100s;
 }
 .orb-3 { 
     width: 65vw; height: 65vw; 
     background: radial-gradient(circle, #38bdf8, transparent 70%); 
     top: 35%; left: 35%; 
-    opacity: 0.25; 
-    animation-delay: -30s;
-    animation-duration: 90s;
+    opacity: 0.2; 
+    animation-delay: -35s;
+    animation-duration: 110s;
 }
 
-/* 優化流動動畫：位移更大、旋轉更自然、透明度變化更平滑 */
 @keyframes drift {
     0% { 
         transform: translate(0, 0) scale(1) rotate(0deg); 
-        opacity: 0.4; 
+        opacity: 0.28; 
     }
     25% { 
-        opacity: 0.55; 
-        transform: translate(8%, 5%) scale(1.05) rotate(10deg);
+        opacity: 0.38; 
+        transform: translate(6%, 4%) scale(1.03) rotate(8deg);
     }
     50% { 
-        opacity: 0.6; 
-        transform: translate(15%, 10%) scale(1.1) rotate(20deg);
+        opacity: 0.42; 
+        transform: translate(12%, 8%) scale(1.06) rotate(16deg);
     }
     75% {
-        opacity: 0.5;
-        transform: translate(18%, 12%) scale(1.12) rotate(28deg);
+        opacity: 0.36;
+        transform: translate(15%, 10%) scale(1.09) rotate(24deg);
     }
     100% { 
-        transform: translate(25%, 18%) scale(1.18) rotate(38deg); 
-        opacity: 0.48; 
+        transform: translate(20%, 15%) scale(1.12) rotate(32deg); 
+        opacity: 0.34; 
     }
 }
 
-/* Noise Texture Overlay */
+/* Noise Texture */
 .noise {
     position: fixed;
     inset: 0;
     z-index: -1;
-    opacity: 0.04;
+    opacity: 0.02;
     pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* --- Liquid Glass Component --- */
+/* Liquid Glass Component */
 .glass-panel {
     background: linear-gradient(135deg, var(--glass-surface), rgba(255,255,255,0.01));
-    backdrop-filter: blur(45px) saturate(160%);
-    -webkit-backdrop-filter: blur(45px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    border-top: 1px solid rgba(255, 255, 255, 0.25); /* Top rim light */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(35px) saturate(160%);
+    -webkit-backdrop-filter: blur(35px) saturate(160%);
+    border: 0.5px solid var(--glass-border);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.22);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.4),
+        0 25px 50px -12px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.05),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
 }
 
 .glass-panel:active {
-    transform: scale(0.985);
+    transform: scale(0.99);
 }
 
-/* --- Content Transitions --- */
+/* Content Transitions */
 .tab-content {
     display: none;
     height: 100%;
-    animation: flowIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: flowIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .tab-content.active { 
@@ -138,11 +135,11 @@ body {
 }
 
 @keyframes flowIn {
-    0% { opacity: 0; transform: scale(0.96) translateY(25px); filter: blur(12px); }
+    0% { opacity: 0; transform: scale(0.96) translateY(20px); filter: blur(10px); }
     100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
-/* --- Input Styling --- */
+/* Input Styling */
 .liquid-input {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -163,7 +160,7 @@ textarea {
     color: rgba(255,255,255,0.9);
 }
 
-/* --- Button Aesthetics --- */
+/* Button Aesthetics */
 .btn-fluid {
     background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
     color: #0f172a;
@@ -185,7 +182,6 @@ textarea {
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-/* Liquid sheen effect */
 .btn-fluid::before {
     content: '';
     position: absolute;
@@ -197,7 +193,7 @@ textarea {
 }
 .btn-fluid:hover::before { left: 100%; }
 
-/* --- Navigation Dock --- */
+/* Navigation Dock */
 .dock-wrap {
     position: fixed;
     bottom: 24px;
@@ -241,7 +237,6 @@ textarea {
 
 .dock-item svg { width: 22px; height: 22px; z-index: 1; stroke-width: 2; }
 
-/* The "Liquid" dot indicator */
 .active-glow {
     position: absolute;
     bottom: 5px;
@@ -259,13 +254,11 @@ textarea {
     transform: scale(1.4); 
 }
 
-/* Custom Scrollbar hide */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 </head>
 <body>
-    <!-- Fluid Background -->
     <div class="liquid-universe">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -273,18 +266,15 @@ textarea {
     </div>
     <div class="noise"></div>
 
-    <!-- Main Layout -->
     <div class="max-w-md mx-auto w-full h-full flex flex-col px-6 relative z-10">
-        
-        <!-- Header (新增動態問候語) -->
+        <!-- Header -->
         <header class="pt-16 pb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <!-- 動態問候語容器 -->
-                    <h1 class="text-4xl font-[200] tracking-tight text-white/90" id="greetingText">
+                    <!-- 優化字重 + 30分鐘更新問候語 -->
+                    <h1 class="text-4xl font-[300] tracking-tight text-white/90" id="greetingText">
                         Good Morning, Jack
                     </h1>
-                    <!-- 保留 Brain Mirror 作為副標題，維持品牌識別 -->
                     <h2 class="text-xl font-[200] tracking-tight text-white/60 mt-1">
                         Brain <span class="font-semibold text-indigo-300">Mirror</span>
                     </h2>
@@ -297,23 +287,13 @@ textarea {
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main class="flex-1 overflow-hidden relative">
-            
             <!-- Tab: Capture -->
             <div id="content-submit" class="tab-content active">
                 <div class="glass-panel rounded-[40px] p-7 flex-1 flex flex-col mb-28 relative overflow-hidden group">
-                    <!-- Subtle inner glow -->
                     <div class="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent pointer-events-none"></div>
-                    
-                    <textarea id="noteInput"
-                        class="w-full flex-1 bg-transparent text-lg font-light outline-none resize-none placeholder-white/15 no-scrollbar leading-relaxed py-2"
-                        placeholder="Capture thoughts in the flow..."></textarea>
-                    
-                    <button onclick="submitNote()" id="btn-submit"
-                        class="btn-fluid w-full py-4 mt-6 text-[10px] font-bold uppercase tracking-[0.25em] relative z-10">
-                        Capture Fragment
-                    </button>
+                    <textarea id="noteInput" class="w-full flex-1 bg-transparent text-lg font-light outline-none resize-none placeholder-white/15 no-scrollbar leading-relaxed py-2" placeholder="Capture thoughts in the flow..."></textarea>
+                    <button onclick="submitNote()" id="btn-submit" class="btn-fluid w-full py-4 mt-6 text-[10px] font-bold uppercase tracking-[0.25em] relative z-10">Capture Fragment</button>
                 </div>
             </div>
 
@@ -346,12 +326,11 @@ textarea {
                     <p class="text-[10px] text-white/30 tracking-[0.4em] mb-2">PULSE READY</p>
                     <p class="text-[8px] text-white/15 tracking-widest">Tap to sync</p>
                 </div>
-
                 <div id="pasteList" class="flex-1 space-y-4 overflow-y-auto no-scrollbar mb-28"></div>
             </div>
         </main>
 
-        <!-- Fixed Bottom Dock -->
+        <!-- Dock -->
         <div class="dock-wrap">
             <nav class="dock">
                 <button onclick="showTab('submit')" id="tab-submit" class="dock-item active">
@@ -377,20 +356,17 @@ textarea {
     </div>
 
 <script>
-// Your existing JS logic remains untouched to preserve functionality
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec";
 
-// --- 新增：UTC+8 動態問候語邏輯 ---
+// UTC+8 動態問候語 + 30分鐘更新
 function updateGreeting() {
-    // 取得 UTC+8 時間 (台灣時區)
     const now = new Date();
-    const utcOffset = 8; // UTC+8
+    const utcOffset = 8;
     const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
     const localTime = new Date(utcTime + (3600000 * utcOffset));
     const hour = localTime.getHours();
 
     let greeting;
-    // 根據時段設定問候語
     if (hour >= 5 && hour < 12) {
         greeting = "Good Morning, Jack";
     } else if (hour >= 12 && hour < 18) {
@@ -401,9 +377,7 @@ function updateGreeting() {
         greeting = "Good Night, Jack";
     }
 
-    // 更新畫面顯示
     document.getElementById('greetingText').textContent = greeting;
-    // 輕微的動畫效果增強互動感
     document.getElementById('greetingText').style.opacity = "0";
     setTimeout(() => {
         document.getElementById('greetingText').style.opacity = "1";
@@ -411,12 +385,13 @@ function updateGreeting() {
     }, 100);
 }
 
-// 頁面載入時執行，並每小時更新一次
+// 🔥 關鍵修改：30分鐘自動更新 (1800000 毫秒)
 window.onload = function() {
     updateGreeting();
-    setInterval(updateGreeting, 3600000); // 每小時更新
+    setInterval(updateGreeting, 1800000);
 };
 
+// 原有功能完全保留
 function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
@@ -460,7 +435,6 @@ async function fetchPasteboard() {
     const list = document.getElementById('pasteList');
     const placeholder = document.getElementById('sync-placeholder');
     
-    // Visual feedback
     if(placeholder.classList.contains('hidden')) {
         list.innerHTML = "<div class='flex justify-center py-8'><div class='w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin'></div></div>";
     } else {
