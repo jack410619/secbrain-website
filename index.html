@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<!-- 🔥 修復：iOS Safari 視口适配（核心解決卡瀏覽器欄） -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Brain Mirror v5.0 | Liquid Glass</title>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -15,6 +16,9 @@
     --accent-primary: #818cf8;
     --accent-secondary: #c084fc;
     --accent-glow: rgba(129, 140, 248, 0.35);
+    /* 🔥 新增：iOS 安全區域變數 */
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-top: env(safe-area-inset-top);
 }
 
 body {
@@ -22,11 +26,14 @@ body {
     background-color: var(--bg-deep);
     color: #ffffff;
     overflow: hidden;
-    height: 100vh;
+    /* 🔥 修復：Safari 高度問題，不使用 100vh */
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     -webkit-tap-highlight-color: transparent;
     selection-background-color: var(--accent-primary);
+    /* 🔥 修復：頂部避開 iOS 瀏覽器欄 */
+    padding-top: var(--safe-top);
 }
 
 /* Liquid Mesh Background */
@@ -196,12 +203,12 @@ textarea {
 /* Navigation Dock */
 .dock-wrap {
     position: fixed;
-    bottom: 24px;
+    /* 🔥 修復：底部避開 iOS Safari 工具欄（核心！） */
+    bottom: calc(24px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     width: fit-content;
     z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .dock {
@@ -232,7 +239,7 @@ textarea {
     color: #ffffff;
     border-color: rgba(255,255,255,0.15);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    transform: translateY(-4px);
+    transform: translateY(-3px);
 }
 
 .dock-item svg { width: 22px; height: 22px; z-index: 1; stroke-width: 2; }
@@ -346,7 +353,7 @@ textarea {
                     <div class="active-glow"></div>
                 </button>
                 <button onclick="showTab('paste')" id="tab-paste" class="dock-item">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg fill="none" viewBox="0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                     <div class="active-glow"></div>
@@ -385,7 +392,7 @@ function updateGreeting() {
     }, 100);
 }
 
-// 🔥 關鍵修改：30分鐘自動更新 (1800000 毫秒)
+// 🔥 30分鐘自動更新 (1800000 毫秒)
 window.onload = function() {
     updateGreeting();
     setInterval(updateGreeting, 1800000);
@@ -397,7 +404,7 @@ function showTab(tab) {
     document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
     document.getElementById('content-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
-    if (window.navigator.vibrate) window.navigator.vibrate(8);
+    if (window.navigator.vibrate) window.navigator.vibrate(5);
 }
 
 async function submitNote() {
