@@ -16,9 +16,43 @@
     --accent-primary: #818cf8;
     --accent-secondary: #c084fc;
     --accent-glow: rgba(129, 140, 248, 0.35);
+    --accent-tertiary: #38bdf8;
     /* 🔥 新增：iOS 安全區域變數 */
     --safe-bottom: env(safe-area-inset-bottom);
     --safe-top: env(safe-area-inset-top);
+    transition: --accent-primary 0.8s ease, --accent-secondary 0.8s ease, --accent-glow 0.8s ease, --accent-tertiary 0.8s ease;
+}
+
+/* 早晨主題 (5:00-12:00) - 清新藍紫 */
+.theme-morning {
+    --accent-primary: #60a5fa;
+    --accent-secondary: #a78bfa;
+    --accent-glow: rgba(96, 165, 250, 0.35);
+    --accent-tertiary: #34d399;
+}
+
+/* 下午主題 (12:00-18:00) - 溫暖金橙 */
+.theme-afternoon {
+    --accent-primary: #fbbf24;
+    --accent-secondary: #f97316;
+    --accent-glow: rgba(251, 191, 36, 0.35);
+    --accent-tertiary: #fb923c;
+}
+
+/* 晚上主題 (18:00-22:00) - 深邃紫紅 */
+.theme-evening {
+    --accent-primary: #c084fc;
+    --accent-secondary: #f472b6;
+    --accent-glow: rgba(192, 132, 252, 0.35);
+    --accent-tertiary: #fb7185;
+}
+
+/* 深夜主題 (22:00-5:00) - 靜謐藍綠 */
+.theme-night {
+    --accent-primary: #818cf8;
+    --accent-secondary: #38bdf8;
+    --accent-glow: rgba(129, 140, 248, 0.25);
+    --accent-tertiary: #2dd4bf;
 }
 
 body {
@@ -52,7 +86,7 @@ body {
     opacity: 0.3;
     animation: drift 80s infinite alternate cubic-bezier(0.3, 0.1, 0.2, 0.9);
     mix-blend-mode: screen;
-    box-shadow: 0 0 80px rgba(129, 140, 248, 0.12), 0 0 150px rgba(192, 132, 252, 0.08);
+    box-shadow: 0 0 80px var(--accent-glow), 0 0 150px rgba(192, 132, 252, 0.06);
 }
 
 .orb-1 { 
@@ -70,7 +104,7 @@ body {
 }
 .orb-3 { 
     width: 65vw; height: 65vw; 
-    background: radial-gradient(circle, #38bdf8, transparent 70%); 
+    background: radial-gradient(circle, var(--accent-tertiary), transparent 70%); 
     top: 35%; left: 35%; 
     opacity: 0.2; 
     animation-delay: -35s;
@@ -181,7 +215,7 @@ textarea {
 
 .btn-fluid:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 15px 40px -5px rgba(129, 140, 248, 0.35);
+    box-shadow: 0 15px 40px -5px var(--accent-glow);
 }
 
 .btn-fluid:active { 
@@ -261,6 +295,14 @@ textarea {
     transform: scale(1.4); 
 }
 
+/* 動態色彩元素 - 使用 CSS 變數 */
+.text-accent-primary { color: var(--accent-primary); }
+.text-accent-secondary { color: var(--accent-secondary); }
+.text-accent-tertiary { color: var(--accent-tertiary); }
+.bg-accent-primary { background-color: var(--accent-primary); }
+.shadow-accent-glow { box-shadow: 0 0 30px var(--accent-glow); }
+.border-accent-primary { border-color: var(--accent-primary); }
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
@@ -283,10 +325,10 @@ textarea {
                         Good Morning, Jack
                     </h1>
                     <h2 class="text-xl font-[200] tracking-tight text-white/60 mt-1">
-                        Brain <span class="font-semibold text-indigo-300">Mirror</span>
+                        Brain <span class="font-semibold text-accent-primary">Mirror</span>
                     </h2>
                     <div class="flex items-center gap-2 mt-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse" style="box-shadow: 0 0 10px var(--accent-primary);"></span>
                         <p class="text-[9px] tracking-[0.3em] text-white/40 uppercase font-semibold">Neural Link Established</p>
                     </div>
                 </div>
@@ -306,7 +348,7 @@ textarea {
 
             <!-- Tab: Search -->
             <div id="content-search" class="tab-content">
-                <div class="liquid-input p-1.5 flex items-center mb-6 shadow-lg shadow-indigo-900/10">
+                <div class="liquid-input p-1.5 flex items-center mb-6 shadow-lg shadow-accent-glow">
                     <input type="text" id="searchInput" class="flex-1 bg-transparent px-5 py-4 outline-none text-sm font-light placeholder-white/30" placeholder="Query neural archives...">
                     <button onclick="runSearch()" class="w-11 h-11 rounded-[20px] bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -325,8 +367,8 @@ textarea {
                 </div>
                 
                 <div id="sync-placeholder" class="flex-1 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[40px] mb-28 group cursor-pointer hover:bg-white/[0.02] transition-colors" onclick="fetchPasteboard()">
-                    <div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_30px_rgba(129,140,248,0.1)]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-20 h-20 rounded-full glass-panel flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500" style="box-shadow: 0 0 30px var(--accent-glow);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
@@ -365,7 +407,7 @@ textarea {
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwKnAJ0mZ_p45d9aqUHY30uAcNWpGDPrSM6XTwyBLsJ5uH49M2TS-CTASTedaHOM2OJ/exec";
 
-// UTC+8 動態問候語 + 30分鐘更新
+// UTC+8 動態問候語 + 30分鐘更新 + 色彩主題切換
 function updateGreeting() {
     const now = new Date();
     const utcOffset = 8;
@@ -373,23 +415,31 @@ function updateGreeting() {
     const localTime = new Date(utcTime + (3600000 * utcOffset));
     const hour = localTime.getHours();
 
-    let greeting;
+    let greeting, themeClass;
     if (hour >= 5 && hour < 12) {
         greeting = "Good Morning, Jack";
+        themeClass = "theme-morning";
     } else if (hour >= 12 && hour < 18) {
         greeting = "Good Afternoon, Jack";
+        themeClass = "theme-afternoon";
     } else if (hour >= 18 && hour < 22) {
         greeting = "Good Evening, Jack";
+        themeClass = "theme-evening";
     } else {
         greeting = "Good Night, Jack";
+        themeClass = "theme-night";
     }
 
+    // 更新問候語
     document.getElementById('greetingText').textContent = greeting;
     document.getElementById('greetingText').style.opacity = "0";
     setTimeout(() => {
         document.getElementById('greetingText').style.opacity = "1";
         document.getElementById('greetingText').style.transition = "opacity 0.8s ease";
     }, 100);
+
+    // 更新色彩主題
+    document.documentElement.className = themeClass;
 }
 
 // 🔥 30分鐘自動更新 (1800000 毫秒)
@@ -428,11 +478,11 @@ async function runSearch() {
     const query = document.getElementById('searchInput').value;
     const resDiv = document.getElementById('searchResult');
     resDiv.classList.remove('hidden');
-    resDiv.innerHTML = "<div class='py-12 flex flex-col items-center'><div class='w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4'></div><div class='text-[9px] tracking-[0.3em] opacity-40 uppercase'>Scanning Neural Web...</div></div>";
+    resDiv.innerHTML = "<div class='py-12 flex flex-col items-center'><div class='w-6 h-6 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin mb-4'></div><div class='text-[9px] tracking-[0.3em] opacity-40 uppercase'>Scanning Neural Web...</div></div>";
     try {
         const res = await fetch(`${GAS_URL}?action=search&q=${encodeURIComponent(query)}`);
         const data = await res.json();
-        resDiv.innerHTML = `<div class='text-indigo-400 text-[9px] mb-4 tracking-[0.3em] uppercase font-bold'>Fragment Retrieved</div><div class="opacity-90 leading-relaxed">${data.answer}</div>`;
+        resDiv.innerHTML = `<div class='text-accent-primary text-[9px] mb-4 tracking-[0.3em] uppercase font-bold'>Fragment Retrieved</div><div class="opacity-90 leading-relaxed">${data.answer}</div>`;
     } catch(e) {
         resDiv.innerHTML = "<div class='text-white/50'>Search unavailable.</div>";
     }
@@ -443,9 +493,9 @@ async function fetchPasteboard() {
     const placeholder = document.getElementById('sync-placeholder');
     
     if(placeholder.classList.contains('hidden')) {
-        list.innerHTML = "<div class='flex justify-center py-8'><div class='w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin'></div></div>";
+        list.innerHTML = "<div class='flex justify-center py-8'><div class='w-6 h-6 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin'></div></div>";
     } else {
-        placeholder.innerHTML = "<div class='w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin'></div>";
+        placeholder.innerHTML = "<div class='w-10 h-10 border-2 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin'></div>";
     }
 
     try {
@@ -462,15 +512,15 @@ async function fetchPasteboard() {
             const div = document.createElement('div');
             div.style.animationDelay = `${index * 0.05}s`;
             div.className = "glass-panel p-6 rounded-3xl active:scale-[0.97] transition-all animate-[flowIn_0.5s_ease-out_forwards] cursor-pointer border-white/5";
-            div.innerHTML = `<div class='text-[8px] text-indigo-400 mb-2 font-bold tracking-widest uppercase'>Cloud Fragment</div><div class='text-sm text-white/80 font-light leading-relaxed'>${item.content}</div>`;
+            div.innerHTML = `<div class='text-[8px] text-accent-primary mb-2 font-bold tracking-widest uppercase'>Cloud Fragment</div><div class='text-sm text-white/80 font-light leading-relaxed'>${item.content}</div>`;
             div.onclick = () => copyAndDelete(item.id, item.content);
             list.appendChild(div);
         });
     } catch (e) {
         if(placeholder.classList.contains('hidden')) {
-             list.innerHTML = "<div class='text-rose-400 text-center py-8'>Sync Failed</div>";
+             list.innerHTML = "<div class='text-accent-secondary text-center py-8'>Sync Failed</div>";
         } else {
-            placeholder.innerHTML = "<p class='text-rose-400 text-[10px] tracking-widest'>SYNC FAILED</p>";
+            placeholder.innerHTML = "<p class='text-accent-secondary text-[10px] tracking-widest'>SYNC FAILED</p>";
         }
     }
 }
