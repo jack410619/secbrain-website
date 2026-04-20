@@ -79,6 +79,17 @@ body {
     overflow: hidden;
 }
 
+/* Canvas for liquid simulation */
+#liquid-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    filter: blur(40px) contrast(1.2);
+    opacity: 0.6;
+}
+
 /* 動態漸變背景層 */
 .liquid-universe::before {
     content: '';
@@ -90,6 +101,7 @@ body {
         radial-gradient(circle at 40% 80%, rgba(56, 189, 248, 0.1), transparent 50%);
     animation: gradientShift 20s ease-in-out infinite alternate;
     filter: blur(60px);
+    z-index: 1;
 }
 
 @keyframes gradientShift {
@@ -387,6 +399,7 @@ textarea {
 </head>
 <body>
     <div class="liquid-universe">
+        <canvas id="liquid-canvas"></canvas>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
@@ -527,7 +540,180 @@ function updateGreeting() {
 window.onload = function() {
     updateGreeting();
     setInterval(updateGreeting, 1800000);
+    initLiquidCanvas();
 };
+
+// Liquid Canvas - 引力場 + 流體模擬
+let canvas, ctx, width, height;
+let particles = [];
+let mouse = { x: null, y: null, radius: 150 };
+let animationId;
+
+function initLiquidCanvas() {
+    canvas = document.getElementById('liquid-canvas');
+    if (!canvas) return;
+    
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+    
+    window.addEventListener('resize', resizeCanvas);
+    
+    // 滑鼠互動
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+    
+    // 創建粒子
+    createParticles();
+    
+    // 開始動畫
+    animate();
+}
+
+function resizeCanvas() {
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    width = rect.width;
+    height = rect.height;
+}
+
+function createParticles() {
+    particles = [];
+    const particleCount = Math.floor((width * height) / 15000);
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            radius: Math.random() * 2 + 1,
+            baseColor: getRandomAccentColor(),
+            alpha: Math.random() * 0.3 + 0.1
+        });
+    }
+}
+
+function getRandomAccentColor() {
+    const colors = [
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#818cf8',
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim() || '#c084fc',
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-tertiary').trim() || '#38bdf8'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 129, g: 140, b: 248 };
+}
+
+function handleMouseMove(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+}
+
+function handleTouchMove(e) {
+    if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }
+}
+
+function drawLiquidField() {
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // 創建漸變背景
+    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height));
+    gradient.addColorStop(0, 'rgba(129, 140, 248, 0.03)');
+    gradient.addColorStop(0.5, 'rgba(192, 132, 252, 0.02)');
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // 繪製並更新粒子
+    particles.forEach(p => {
+        // 引力場效果
+        if (mouse.x !== null && mouse.y !== null) {
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < mouse.radius) {
+                const force = (mouse.radius - distance) / mouse.radius;
+                const angle = Math.atan2(dy, dx);
+                p.vx -= Math.cos(angle) * force * 0.02;
+                p.vy -= Math.sin(angle) * force * 0.02;
+            }
+        }
+        
+        // 邊界反彈
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        
+        // 速度限制
+        p.vx = Math.max(-1, Math.min(1, p.vx));
+        p.vy = Math.max(-1, Math.min(1, p.vy));
+        
+        // 更新位置
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        // 摩擦力
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+        
+        // 繪製粒子
+        const rgb = hexToRgb(p.baseColor);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${p.alpha})`;
+        ctx.fill();
+        
+        // 連接鄰近粒子（液體感）
+        particles.forEach(p2 => {
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 50) {
+                const rgb2 = hexToRgb(p2.baseColor);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.05 * (1 - dist/50)})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        });
+    });
+    
+    // 滑鼠漣漪效果
+    if (mouse.x !== null && mouse.y !== null) {
+        const rippleGradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.radius);
+        rippleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.02)');
+        rippleGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = rippleGradient;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function animate() {
+    drawLiquidField();
+    animationId = requestAnimationFrame(animate);
+}
 
 // 原有功能完全保留
 function showTab(tab) {
