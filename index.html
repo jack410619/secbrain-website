@@ -79,6 +79,37 @@ body {
     overflow: hidden;
 }
 
+/* Canvas for liquid simulation */
+#liquid-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    filter: blur(40px) contrast(1.2);
+    opacity: 0.6;
+}
+
+/* 動態漸變背景層 */
+.liquid-universe::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(129, 140, 248, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(192, 132, 252, 0.12), transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(56, 189, 248, 0.1), transparent 50%);
+    animation: gradientShift 20s ease-in-out infinite alternate;
+    filter: blur(60px);
+    z-index: 1;
+}
+
+@keyframes gradientShift {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+    50% { transform: translate(3%, -2%) scale(1.05); opacity: 0.7; }
+    100% { transform: translate(-2%, 3%) scale(0.95); opacity: 0.6; }
+}
+
 .orb {
     position: absolute;
     border-radius: 50%;
@@ -87,28 +118,87 @@ body {
     animation: drift 80s infinite alternate cubic-bezier(0.3, 0.1, 0.2, 0.9);
     mix-blend-mode: screen;
     box-shadow: 0 0 80px var(--accent-glow), 0 0 150px rgba(192, 132, 252, 0.06);
+    /* 🔥 修復：確保在手機上也能完整顯示 */
+    max-width: 100vw;
+    max-height: 100vh;
 }
 
 .orb-1 { 
-    width: 90vw; height: 90vw; 
+    width: 80vw; height: 80vw; 
+    max-width: 500px; max-height: 500px;
     background: radial-gradient(circle, var(--accent-primary), transparent 70%); 
-    top: -25%; left: -20%; 
+    top: 10%; left: 5%; 
     animation-duration: 90s;
 }
 .orb-2 { 
-    width: 85vw; height: 85vw; 
+    width: 75vw; height: 75vw; 
+    max-width: 450px; max-height: 450px;
     background: radial-gradient(circle, var(--accent-secondary), transparent 70%); 
-    bottom: -15%; right: -15%; 
+    bottom: 10%; right: 5%; 
     animation-delay: -20s;
     animation-duration: 100s;
 }
 .orb-3 { 
-    width: 65vw; height: 65vw; 
+    width: 55vw; height: 55vw; 
+    max-width: 350px; max-height: 350px;
     background: radial-gradient(circle, var(--accent-tertiary), transparent 70%); 
-    top: 35%; left: 35%; 
-    opacity: 0.2; 
+    top: 40%; left: 40%; 
+    opacity: 0.25; 
     animation-delay: -35s;
     animation-duration: 110s;
+}
+
+/* 新增：小型浮動粒子 */
+.orb-particle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    mix-blend-mode: screen;
+    animation: particleFloat 60s infinite ease-in-out;
+    opacity: 0.15;
+}
+
+.orb-particle-1 {
+    width: 30vw; height: 30vw;
+    max-width: 180px; max-height: 180px;
+    background: radial-gradient(circle, var(--accent-primary), transparent 70%);
+    top: 60%; left: 15%;
+    animation-delay: -10s;
+}
+
+.orb-particle-2 {
+    width: 25vw; height: 25vw;
+    max-width: 150px; max-height: 150px;
+    background: radial-gradient(circle, var(--accent-tertiary), transparent 70%);
+    top: 20%; left: 70%;
+    animation-delay: -30s;
+}
+
+.orb-particle-3 {
+    width: 20vw; height: 20vw;
+    max-width: 120px; max-height: 120px;
+    background: radial-gradient(circle, var(--accent-secondary), transparent 70%);
+    top: 70%; left: 80%;
+    animation-delay: -45s;
+}
+
+@keyframes particleFloat {
+    0%, 100% { 
+        transform: translate(0, 0) scale(1); 
+        opacity: 0.15;
+    }
+    25% { 
+        transform: translate(10%, -15%) scale(1.1); 
+        opacity: 0.2;
+    }
+    50% { 
+        transform: translate(-5%, 10%) scale(0.95); 
+        opacity: 0.18;
+    }
+    75% { 
+        transform: translate(15%, 5%) scale(1.05); 
+        opacity: 0.22;
+    }
 }
 
 @keyframes drift {
@@ -309,9 +399,13 @@ textarea {
 </head>
 <body>
     <div class="liquid-universe">
+        <canvas id="liquid-canvas"></canvas>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
+        <div class="orb-particle orb-particle-1"></div>
+        <div class="orb-particle orb-particle-2"></div>
+        <div class="orb-particle orb-particle-3"></div>
     </div>
     <div class="noise"></div>
 
@@ -446,7 +540,180 @@ function updateGreeting() {
 window.onload = function() {
     updateGreeting();
     setInterval(updateGreeting, 1800000);
+    initLiquidCanvas();
 };
+
+// Liquid Canvas - 引力場 + 流體模擬
+let canvas, ctx, width, height;
+let particles = [];
+let mouse = { x: null, y: null, radius: 150 };
+let animationId;
+
+function initLiquidCanvas() {
+    canvas = document.getElementById('liquid-canvas');
+    if (!canvas) return;
+    
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+    
+    window.addEventListener('resize', resizeCanvas);
+    
+    // 滑鼠互動
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+    
+    // 創建粒子
+    createParticles();
+    
+    // 開始動畫
+    animate();
+}
+
+function resizeCanvas() {
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    width = rect.width;
+    height = rect.height;
+}
+
+function createParticles() {
+    particles = [];
+    const particleCount = Math.floor((width * height) / 15000);
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            radius: Math.random() * 2 + 1,
+            baseColor: getRandomAccentColor(),
+            alpha: Math.random() * 0.3 + 0.1
+        });
+    }
+}
+
+function getRandomAccentColor() {
+    const colors = [
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#818cf8',
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim() || '#c084fc',
+        getComputedStyle(document.documentElement).getPropertyValue('--accent-tertiary').trim() || '#38bdf8'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 129, g: 140, b: 248 };
+}
+
+function handleMouseMove(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+}
+
+function handleTouchMove(e) {
+    if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }
+}
+
+function drawLiquidField() {
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // 創建漸變背景
+    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height));
+    gradient.addColorStop(0, 'rgba(129, 140, 248, 0.03)');
+    gradient.addColorStop(0.5, 'rgba(192, 132, 252, 0.02)');
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // 繪製並更新粒子
+    particles.forEach(p => {
+        // 引力場效果
+        if (mouse.x !== null && mouse.y !== null) {
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < mouse.radius) {
+                const force = (mouse.radius - distance) / mouse.radius;
+                const angle = Math.atan2(dy, dx);
+                p.vx -= Math.cos(angle) * force * 0.02;
+                p.vy -= Math.sin(angle) * force * 0.02;
+            }
+        }
+        
+        // 邊界反彈
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        
+        // 速度限制
+        p.vx = Math.max(-1, Math.min(1, p.vx));
+        p.vy = Math.max(-1, Math.min(1, p.vy));
+        
+        // 更新位置
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        // 摩擦力
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+        
+        // 繪製粒子
+        const rgb = hexToRgb(p.baseColor);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${p.alpha})`;
+        ctx.fill();
+        
+        // 連接鄰近粒子（液體感）
+        particles.forEach(p2 => {
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 50) {
+                const rgb2 = hexToRgb(p2.baseColor);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.05 * (1 - dist/50)})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        });
+    });
+    
+    // 滑鼠漣漪效果
+    if (mouse.x !== null && mouse.y !== null) {
+        const rippleGradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.radius);
+        rippleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.02)');
+        rippleGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = rippleGradient;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function animate() {
+    drawLiquidField();
+    animationId = requestAnimationFrame(animate);
+}
 
 // 原有功能完全保留
 function showTab(tab) {
